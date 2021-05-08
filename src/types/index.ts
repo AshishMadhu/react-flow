@@ -434,3 +434,14 @@ export interface ReactFlowState {
 }
 
 export type UpdateNodeInternals = (nodeId: ElementId) => void;
+
+
+export type HandleBounds = {
+  id: ElementId;
+  position: Position;
+  height: Number;
+  width: Number;
+  x: Number;
+  y: Number;
+  styles: String[] | null;
+};

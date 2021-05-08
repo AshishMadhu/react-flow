@@ -23,11 +23,19 @@ import {
 
 import * as constants from "./contants";
 
+export const setChangeHandleStyle = () =>
+  createAction(constants.CHANGE_HANDLE_STYLE);
+
 export const setToggleTarget = (
   nodeId: ElementId,
   handleBoundsId: String | null,
-  elementBelow: Element | null,
-) => createAction(constants.TOGGLE_TARGET, { nodeId, handleBoundsId, elementBelow });
+  elementBelow: Element | null
+) =>
+  createAction(constants.TOGGLE_TARGET, {
+    nodeId,
+    handleBoundsId,
+    elementBelow,
+  });
 
 export const setOnConnect = (onConnect: OnConnectFunc) =>
   createAction(constants.SET_ON_CONNECT, {
@@ -150,6 +158,7 @@ export const setNodeExtent = (nodeExtent: NodeExtent) =>
   createAction(constants.SET_NODE_EXTENT, nodeExtent);
 
 export type ReactFlowAction = ReturnType<
+  | typeof setChangeHandleStyle
   | typeof setToggleTarget
   | typeof setOnConnect
   | typeof setOnConnectStart

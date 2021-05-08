@@ -12,11 +12,19 @@ import {
 } from "../utils/graph";
 import { getHandleBounds } from "../components/Nodes/utils";
 
-import { ReactFlowState, Node, XYPosition, Edge } from "../types";
+import {
+  ReactFlowState,
+  Node,
+  XYPosition,
+  Edge,
+  HandleBounds,
+} from "../types";
 import * as constants from "./contants";
 import { ReactFlowAction } from "./actions";
 
 import { initialState } from "./index";
+
+import {checkHandleConnected} from './utils';
 
 type NextElements = {
   nextNodes: Node[];
@@ -35,19 +43,76 @@ export default function reactFlowReducer(
   action: ReactFlowAction
 ): ReactFlowState {
   switch (action.type) {
+    case constants.CHANGE_HANDLE_STYLE: {
+      const checkAndAssignStyle = (
+        connectionHandle: HandleBounds
+      ): HandleBounds => {
+        if (connectionHandle.id !== state.connectionHandleId) {
+          const connected = checkHandleConnected(state, connectionHandle.id)
+          if(!connected) {
+             (connectionHandle.styles = [
+                `react-flow__handle-${connectionHandle.id}-hide`,
+              ])
+           } else (connectionHandle.styles = null);
+        } else {
+          connectionHandle.styles = null;
+        }
+        return connectionHandle;
+      };
+      const nextNodes: Node[] = state.nodes.reduce((res, node): Node[] => {
+        if (node.id === state.connectionNodeId) {
+          const updatedNode = {
+            ...node,
+            __rf: {
+              ...node.__rf,
+            },
+          };
+          // if (updatedNode.__rf.handleBounds.source) {
+          //   const newSources: HandleBounds[] = updatedNode.__rf.handleBounds.source.reduce(
+          //     (res: HandleBounds[], source: HandleBounds): HandleBounds[] => {
+          //       const newSource = checkAndAssignStyle(source);
+          //       res.push(newSource);
+          //       return res;
+          //     },
+          //     [] as HandleBounds[]
+          //   );
+          //   updatedNode.__rf.handleBounds.source = newSources;
+          // }
+          const targets: HandleBounds[] = updatedNode.__rf.handleBounds.target;
+          const newTargets: HandleBounds[] = targets.reduce(
+            (res, target): HandleBounds[] => {
+              const newTarget = checkAndAssignStyle(target);
+              res.push(newTarget);
+              return res;
+            },
+            [] as HandleBounds[]
+          );
+          updatedNode.__rf.handleBounds.target = newTargets;
+          res.push(updatedNode);
+        } else res.push(node);
+        return res;
+      }, [] as Node[]);
+      return { ...state, nodes: nextNodes };
+    }
     case constants.TOGGLE_TARGET: {
       const targetNodeId = action.payload.nodeId;
       const handleBoundsId = action.payload.handleBoundsId;
       const elementBelow = action.payload.elementBelow;
       const nextNodes: Node[] = state.nodes.reduce((res, node): Node[] => {
         if (node.id === targetNodeId) {
-          var foundHandleSource = node.__rf.handleBounds.source
-            ? node.__rf.handleBounds.source.find(
+          const updatedNode = {
+            ...node,
+            __rf: {
+              ...node.__rf,
+            },
+          };
+          var foundHandleSource = updatedNode.__rf.handleBounds.source
+            ? updatedNode.__rf.handleBounds.source.find(
                 (s: { id: String | null }) => s.id === handleBoundsId
               )
             : false;
 
-          const foundHandleTarget = node.__rf.handleBounds.target.find(
+          const foundHandleTarget = updatedNode.__rf.handleBounds.target.find(
             (s: { id: String | null }) => s.id === handleBoundsId
           );
           if (foundHandleSource) {
@@ -59,12 +124,12 @@ export default function reactFlowReducer(
             );
             if (!connected) {
               toggleTargetClass(elementBelow);
-              const sources = node.__rf.handleBounds.source.filter(
+              const sources = updatedNode.__rf.handleBounds.source.filter(
                 (source: any) => source.id !== handleBoundsId
               );
 
-              node.__rf.handleBounds.source = sources;
-              node.__rf.handleBounds.target.push(foundHandleSource);
+              updatedNode.__rf.handleBounds.source = sources;
+              updatedNode.__rf.handleBounds.target.push(foundHandleSource);
             }
           } else if (foundHandleTarget) {
             //check connections
@@ -73,20 +138,20 @@ export default function reactFlowReducer(
                 edge.target === targetNodeId &&
                 edge.targetHandle === foundHandleTarget.id
             );
-            node.__rf.handleBounds.source
+            updatedNode.__rf.handleBounds.source
               ? ""
-              : (node.__rf.handleBounds.source = []);
+              : (updatedNode.__rf.handleBounds.source = []);
             if (!connected) {
               toggleTargetClass(elementBelow);
-              const targets = node.__rf.handleBounds.target.filter(
+              const targets = updatedNode.__rf.handleBounds.target.filter(
                 (target: any) => target.id !== handleBoundsId
               );
-              node.__rf.handleBounds.target = targets;
-              node.__rf.handleBounds.source.push(foundHandleTarget);
+              updatedNode.__rf.handleBounds.target = targets;
+              updatedNode.__rf.handleBounds.source.push(foundHandleTarget);
             }
           }
-        }
-        res.push(node);
+          res.push(updatedNode);
+        } else res.push(node);
         return res;
       }, [] as Node[]);
       return { ...state, nodes: nextNodes };
