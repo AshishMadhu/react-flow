@@ -23,8 +23,11 @@ import {
 
 import * as constants from "./contants";
 
-export const setChangeHandleStyle = () =>
-  createAction(constants.CHANGE_HANDLE_STYLE);
+export const setChangeHandleStyle = (
+  action: String,
+  toggle: boolean = false,
+  nodeId: string | null = null
+) => createAction(constants.CHANGE_HANDLE_STYLE, { action, toggle, nodeId });
 
 export const setToggleTarget = (
   nodeId: ElementId,

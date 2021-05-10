@@ -1,6 +1,6 @@
 import React, { memo, CSSProperties, useCallback } from 'react';
 
-import { useStoreState } from '../../store/hooks';
+import { useStore, useStoreState } from '../../store/hooks';
 import ConnectionLine from '../../components/ConnectionLine/index';
 import { isEdge } from '../../utils/graph';
 import MarkerDefinitions from './MarkerDefinitions';
@@ -101,11 +101,14 @@ const Edge = ({
   const sourcePosition = sourceHandle ? sourceHandle.position : Position.Bottom;
   const targetPosition = targetHandle ? targetHandle.position : Position.Top;
 
+  const store = useStore().getState();
+
   if (!sourceHandle) {
     console.warn(`couldn't create edge for source handle id: ${sourceHandleId}; edge id: ${edge.id}`);
     return null;
   }
   if (!targetHandle) {
+    console.log(store);
     console.warn(`couldn't create edge for target handle id: ${targetHandleId}; edge id: ${edge.id}`);
     return null;
   }
