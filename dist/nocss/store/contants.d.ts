@@ -4,6 +4,7 @@ export declare const SET_ON_CONNECT_STOP = "SET_ON_CONNECT_STOP";
 export declare const SET_ON_CONNECT_END = "SET_ON_CONNECT_END";
 export declare const SET_ELEMENTS = "SET_ELEMENTS";
 export declare const TOGGLE_TARGET = "TOGGLE_TARGET";
+export declare const CHANGE_HANDLE_STYLE = "CHANGE_HANDLE_STYLE";
 export declare const UPDATE_NODE_DIMENSIONS = "UPDATE_NODE_DIMENSIONS";
 export declare const UPDATE_NODE_POS = "UPDATE_NODE_POS";
 export declare const UPDATE_NODE_POS_DIFF = "UPDATE_NODE_POS_DIFF";

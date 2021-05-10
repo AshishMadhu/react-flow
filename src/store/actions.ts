@@ -23,11 +23,16 @@ import {
 
 import * as constants from "./contants";
 
+type SetChangeHandleStyleType = {
+  actions: String,
+  toggle?: boolean,
+  nodeId?: string | null,
+  hover?:boolean|undefined,
+}
+
 export const setChangeHandleStyle = (
-  action: String,
-  toggle: boolean = false,
-  nodeId: string | null = null
-) => createAction(constants.CHANGE_HANDLE_STYLE, { action, toggle, nodeId });
+  data: SetChangeHandleStyleType
+) => createAction(constants.CHANGE_HANDLE_STYLE, { data });
 
 export const setToggleTarget = (
   nodeId: ElementId,

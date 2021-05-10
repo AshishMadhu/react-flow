@@ -18,7 +18,7 @@ import { ReactFlowAction } from "./actions";
 
 import { initialState } from "./index";
 
-import { changeOnClick, toggleOnDrag } from "./utils";
+import { changeOnClickAndHoverHandler, toggleOnDrag } from "./utils";
 
 type NextElements = {
   nextNodes: Node[];
@@ -38,19 +38,24 @@ export default function reactFlowReducer(
 ): ReactFlowState {
   switch (action.type) {
     case constants.CHANGE_HANDLE_STYLE: {
-      const onDrag = "onDrag";
-      const onClick = "onClick", onHover = "onHover";
-      switch (action.payload.action) {
+      const onDrag = "onDrag",
+        onClick = "onClick",
+        onHover = "onHover";
+      switch (action.payload.data.actions) {
         case onDrag: {
-          toggleOnDrag(state, action.payload.toggle);
+          toggleOnDrag(state, action.payload.data.toggle);
           return state;
         }
         case onClick: {
-          const nextNodes = changeOnClick(state, state.connectionNodeId);
+          const nextNodes = changeOnClickAndHoverHandler(state, state.connectionNodeId);
           return { ...state, nodes: nextNodes };
         }
         case onHover: {
-          const nextNodes = changeOnClick(state, action.payload.nodeId, true);
+          const nextNodes = changeOnClickAndHoverHandler(
+            state,
+            action.payload.data.nodeId,
+            action.payload.data.hover
+          );
           return { ...state, nodes: nextNodes };
         }
         default: {

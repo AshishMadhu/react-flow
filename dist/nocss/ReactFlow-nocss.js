@@ -2158,6 +2158,92 @@ var useSelector = /*#__PURE__*/createSelectorHook();
 
 setBatch(require$$2.unstable_batchedUpdates);
 
+function ownKeys$9(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread$9(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$9(Object(source), true).forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$9(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var checkHandlesConnected = function checkHandlesConnected(state, handleId, nodeId) {
+  var edge = state.edges.find(function (edge) {
+    return edge.sourceHandle === handleId && edge.source === nodeId || edge.targetHandle === handleId && edge.target === nodeId;
+  });
+  if (edge === undefined) return false;
+  return true;
+};
+
+var checkAndAssignStyle = function checkAndAssignStyle(state, connectionHandle, nodeId, hover) {
+  if (connectionHandle.id !== state.connectionHandleId) {
+    var connected = checkHandlesConnected(state, connectionHandle.id, nodeId); // handle should not be connected and hover must be false
+
+    if (!connected && !hover) {
+      connectionHandle.styles = ["react-flow__handle-".concat(connectionHandle.id, "-hide")];
+    } else connectionHandle.styles = null;
+  }
+
+  return connectionHandle;
+};
+
+var loopThroughHandlesAndChangeStyles = function loopThroughHandlesAndChangeStyles(state, handles, nodeId, hover) {
+  var newHandles = handles.reduce(function (res, handle) {
+    var newHandle = checkAndAssignStyle(state, handle, nodeId, hover);
+    res.push(newHandle);
+    return res;
+  }, []);
+  return newHandles;
+};
+
+function changeOnClickAndHoverHandler(state, nodeId) {
+  var hover = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  var nextNodes = state.nodes.reduce(function (res, node) {
+    if (node.id === nodeId) {
+      var updatedNode = _objectSpread$9(_objectSpread$9({}, node), {}, {
+        __rf: _objectSpread$9({}, node.__rf)
+      }); // changing source style
+
+
+      var sources = updatedNode.__rf.handleBounds.source;
+      var newSources = sources ? loopThroughHandlesAndChangeStyles(state, sources, nodeId, hover) : [];
+      updatedNode.__rf.handleBounds.source = newSources; //changing target style
+
+      var targets = updatedNode.__rf.handleBounds.target;
+      var newTargets = targets ? loopThroughHandlesAndChangeStyles(state, targets, nodeId, hover) : [];
+      updatedNode.__rf.handleBounds.target = newTargets;
+      res.push(updatedNode);
+    } else res.push(node);
+
+    return res;
+  }, []);
+  return nextNodes;
+}
+function toggleOnDrag(state) {
+  var toggle = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  var nextNodes = state.nodes.reduce(function (res, node) {
+    if (node.id !== state.connectionNodeId) {
+      var updatedNode = _objectSpread$9(_objectSpread$9({}, node), {}, {
+        __rf: _objectSpread$9({}, node.__rf)
+      });
+
+      var targets = updatedNode.__rf.handleBounds.target;
+
+      if (targets) {
+        var newTargets = targets.reduce(function (res, target) {
+          if (!checkHandlesConnected(state, String(target.id), updatedNode.id)) {
+            if (toggle) {
+              target.styles = ["react-flow__handle-".concat(target.id, "-hide")];
+            } else target.styles = [];
+          }
+
+          res.push(target);
+          return res;
+        }, []);
+        updatedNode.__rf.handleBounds.target = newTargets;
+      }
+    } //
+
+
+    return res;
+  }, []);
+  return nextNodes;
+}
 function createAction(type, payload) {
   return {
     type: type,
@@ -2171,6 +2257,7 @@ var SET_ON_CONNECT_STOP = 'SET_ON_CONNECT_STOP';
 var SET_ON_CONNECT_END = 'SET_ON_CONNECT_END';
 var SET_ELEMENTS = 'SET_ELEMENTS';
 var TOGGLE_TARGET = 'TOGGLE_TARGET';
+var CHANGE_HANDLE_STYLE = 'CHANGE_HANDLE_STYLE';
 var UPDATE_NODE_DIMENSIONS = 'UPDATE_NODE_DIMENSIONS';
 var UPDATE_NODE_POS = 'UPDATE_NODE_POS';
 var UPDATE_NODE_POS_DIFF = 'UPDATE_NODE_POS_DIFF';
@@ -2200,6 +2287,11 @@ var SET_MULTI_SELECTION_ACTIVE = 'SET_MULTI_SELECTION_ACTIVE';
 var SET_CONNECTION_MODE = 'SET_CONNECTION_MODE';
 var SET_NODE_EXTENT = 'SET_NODE_EXTENT';
 
+var setChangeHandleStyle = function setChangeHandleStyle(data) {
+  return createAction(CHANGE_HANDLE_STYLE, {
+    data: data
+  });
+};
 var setToggleTarget = function setToggleTarget(nodeId, handleBoundsId, elementBelow) {
   return createAction(TOGGLE_TARGET, {
     nodeId: nodeId,
@@ -2348,6 +2440,7 @@ var setNodeExtent = function setNodeExtent(nodeExtent) {
 
 var actions = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  setChangeHandleStyle: setChangeHandleStyle,
   setToggleTarget: setToggleTarget,
   setOnConnect: setOnConnect,
   setOnConnectStart: setOnConnectStart,
@@ -9767,6 +9860,7 @@ var Edge = function Edge(_ref) {
   var targetHandle = getHandle(targetNodeHandles, targetHandleId);
   var sourcePosition = sourceHandle ? sourceHandle.position : exports.Position.Bottom;
   var targetPosition = targetHandle ? targetHandle.position : exports.Position.Top;
+  var store = useStore().getState();
 
   if (!sourceHandle) {
     console.warn("couldn't create edge for source handle id: ".concat(sourceHandleId, "; edge id: ").concat(edge.id));
@@ -9774,6 +9868,7 @@ var Edge = function Edge(_ref) {
   }
 
   if (!targetHandle) {
+    console.log(store);
     console.warn("couldn't create edge for target handle id: ".concat(targetHandleId, "; edge id: ").concat(edge.id));
     return null;
   }
@@ -10827,18 +10922,60 @@ function reactFlowReducer() {
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
   switch (action.type) {
+    case CHANGE_HANDLE_STYLE:
+      {
+        var onDrag = "onDrag",
+            onClick = "onClick",
+            onHover = "onHover";
+
+        switch (action.payload.data.actions) {
+          case onDrag:
+            {
+              toggleOnDrag(state, action.payload.data.toggle);
+              return state;
+            }
+
+          case onClick:
+            {
+              var nextNodes = changeOnClickAndHoverHandler(state, state.connectionNodeId);
+              return _objectSpread$1(_objectSpread$1({}, state), {}, {
+                nodes: nextNodes
+              });
+            }
+
+          case onHover:
+            {
+              var _nextNodes = changeOnClickAndHoverHandler(state, action.payload.data.nodeId, action.payload.data.hover);
+
+              return _objectSpread$1(_objectSpread$1({}, state), {}, {
+                nodes: _nextNodes
+              });
+            }
+
+          default:
+            {
+              return state;
+            }
+        }
+      }
+
     case TOGGLE_TARGET:
       {
         var targetNodeId = action.payload.nodeId;
         var handleBoundsId = action.payload.handleBoundsId;
         var elementBelow = action.payload.elementBelow;
-        var nextNodes = state.nodes.reduce(function (res, node) {
+
+        var _nextNodes2 = state.nodes.reduce(function (res, node) {
           if (node.id === targetNodeId) {
-            var foundHandleSource = node.__rf.handleBounds.source ? node.__rf.handleBounds.source.find(function (s) {
+            var updatedNode = _objectSpread$1(_objectSpread$1({}, node), {}, {
+              __rf: _objectSpread$1({}, node.__rf)
+            });
+
+            var foundHandleSource = updatedNode.__rf.handleBounds.source ? updatedNode.__rf.handleBounds.source.find(function (s) {
               return s.id === handleBoundsId;
             }) : false;
 
-            var foundHandleTarget = node.__rf.handleBounds.target.find(function (s) {
+            var foundHandleTarget = updatedNode.__rf.handleBounds.target.find(function (s) {
               return s.id === handleBoundsId;
             });
 
@@ -10851,13 +10988,13 @@ function reactFlowReducer() {
               if (!connected) {
                 toggleTargetClass(elementBelow);
 
-                var sources = node.__rf.handleBounds.source.filter(function (source) {
+                var sources = updatedNode.__rf.handleBounds.source.filter(function (source) {
                   return source.id !== handleBoundsId;
                 });
 
-                node.__rf.handleBounds.source = sources;
+                updatedNode.__rf.handleBounds.source = sources;
 
-                node.__rf.handleBounds.target.push(foundHandleSource);
+                updatedNode.__rf.handleBounds.target.push(foundHandleSource);
               }
             } else if (foundHandleTarget) {
               //check connections
@@ -10865,27 +11002,29 @@ function reactFlowReducer() {
                 return edge.target === targetNodeId && edge.targetHandle === foundHandleTarget.id;
               });
 
-              node.__rf.handleBounds.source ? "" : node.__rf.handleBounds.source = [];
+              updatedNode.__rf.handleBounds.source ? "" : updatedNode.__rf.handleBounds.source = [];
 
               if (!_connected) {
                 toggleTargetClass(elementBelow);
 
-                var targets = node.__rf.handleBounds.target.filter(function (target) {
+                var targets = updatedNode.__rf.handleBounds.target.filter(function (target) {
                   return target.id !== handleBoundsId;
                 });
 
-                node.__rf.handleBounds.target = targets;
+                updatedNode.__rf.handleBounds.target = targets;
 
-                node.__rf.handleBounds.source.push(foundHandleTarget);
+                updatedNode.__rf.handleBounds.source.push(foundHandleTarget);
               }
             }
-          }
 
-          res.push(node);
+            res.push(updatedNode);
+          } else res.push(node);
+
           return res;
         }, []);
+
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: nextNodes
+          nodes: _nextNodes2
         });
       }
 
@@ -10934,11 +11073,11 @@ function reactFlowReducer() {
 
           return res;
         }, nextElements),
-            _nextNodes = _propElements$reduce.nextNodes,
+            _nextNodes3 = _propElements$reduce.nextNodes,
             nextEdges = _propElements$reduce.nextEdges;
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes,
+          nodes: _nextNodes3,
           edges: nextEdges
         });
       }
@@ -10989,7 +11128,7 @@ function reactFlowReducer() {
           };
         }
 
-        var _nextNodes2 = state.nodes.map(function (node) {
+        var _nextNodes4 = state.nodes.map(function (node) {
           if (node.id === id) {
             return _objectSpread$1(_objectSpread$1({}, node), {}, {
               __rf: _objectSpread$1(_objectSpread$1({}, node.__rf), {}, {
@@ -11002,7 +11141,7 @@ function reactFlowReducer() {
         });
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes2
+          nodes: _nextNodes4
         });
       }
 
@@ -11013,7 +11152,7 @@ function reactFlowReducer() {
             diff = _action$payload2.diff,
             isDragging = _action$payload2.isDragging;
 
-        var _nextNodes3 = state.nodes.map(function (node) {
+        var _nextNodes5 = state.nodes.map(function (node) {
           var _state$selectedElemen;
 
           if (_id === node.id || (_state$selectedElemen = state.selectedElements) !== null && _state$selectedElemen !== void 0 && _state$selectedElemen.find(function (sNode) {
@@ -11039,7 +11178,7 @@ function reactFlowReducer() {
         });
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes3
+          nodes: _nextNodes5
         });
       }
 

@@ -1,18 +1,5 @@
 import { ElementId, ReactFlowState, HandleBounds, Node } from "../types";
-
-// export function checkHandleConnected(
-//   state: ReactFlowState,
-//   handleId: ElementId
-// ): any {
-//   // check if the current handle is connected
-//   return state.edges.find(
-//     (edge) =>
-//       (edge.source === state.connectionNodeId &&
-//         edge.sourceHandle === handleId) ||
-//       (edge.target === state.connectionNodeId && edge.targetHandle === handleId)
-//   );
-// }
-
+var sourceConnectedFound = false;
 const checkHandlesConnected = (
   state: ReactFlowState,
   handleId: ElementId | null,
@@ -30,23 +17,25 @@ const checkHandlesConnected = (
 const checkAndAssignStyle = (
   state: ReactFlowState,
   connectionHandle: HandleBounds,
-  hover: boolean,
+  nodeId: ElementId,
+  hover: boolean
 ): HandleBounds => {
   if (connectionHandle.id !== state.connectionHandleId) {
     const connected = checkHandlesConnected(
       state,
       connectionHandle.id as ElementId,
-      state.connectionNodeId
+      nodeId
     );
-    console.log(connected, 'connected');
+    // handle should not be connected and hover must be false
     if (!connected && !hover) {
-      console.log('hover styles');
+      connectionHandle.styles = [
+        `react-flow__handle-${connectionHandle.id}-hide`,
+      ];
+    } else if (!connected && sourceConnectedFound) {
       connectionHandle.styles = [
         `react-flow__handle-${connectionHandle.id}-hide`,
       ];
     } else connectionHandle.styles = null;
-  } else {
-    connectionHandle.styles = null;
   }
   return connectionHandle;
 };
@@ -54,11 +43,12 @@ const checkAndAssignStyle = (
 const loopThroughHandlesAndChangeStyles = (
   state: ReactFlowState,
   handles: HandleBounds[],
-  hover: boolean,
+  nodeId: ElementId,
+  hover: boolean
 ): HandleBounds[] => {
   const newHandles: HandleBounds[] = handles.reduce(
     (res, handle): HandleBounds[] => {
-      const newHandle = checkAndAssignStyle(state, handle, hover);
+      const newHandle = checkAndAssignStyle(state, handle, nodeId, hover);
       res.push(newHandle);
       return res;
     },
@@ -67,16 +57,13 @@ const loopThroughHandlesAndChangeStyles = (
   return newHandles;
 };
 
-export function changeOnClick(
+export function changeOnClickAndHoverHandler(
   state: ReactFlowState,
-  nodeId: ElementId | null,
-  hover: boolean = false
+  nodeId: ElementId | null | undefined,
+  hover: boolean | undefined = false
 ): Node[] {
-  console.log('hover');
   const nextNodes: Node[] = state.nodes.reduce((res, node): Node[] => {
-    console.log(nodeId, 'nodeId');
     if (node.id === nodeId) {
-      console.log(node, 'node found');
       const updatedNode = {
         ...node,
         __rf: {
@@ -85,17 +72,25 @@ export function changeOnClick(
       };
       // changing source style
       const sources: HandleBounds[] = updatedNode.__rf.handleBounds.source;
+      if (
+        sources &&
+        sources.length &&
+        updatedNode.type === "singleSourceNode"
+      ) {
+        const connected = sources.find((source) =>
+          checkHandlesConnected(state, String(source.id), updatedNode.id)
+        );
+        connected ? (sourceConnectedFound = true) : null;
+      } else sourceConnectedFound = false;
       const newSources = sources
-        ? loopThroughHandlesAndChangeStyles(state, sources, hover)
+        ? loopThroughHandlesAndChangeStyles(state, sources, nodeId, hover)
         : [];
-      console.log(newSources);
       updatedNode.__rf.handleBounds.source = newSources;
       //changing target style
       const targets: HandleBounds[] = updatedNode.__rf.handleBounds.target;
       const newTargets: HandleBounds[] = targets
-        ? loopThroughHandlesAndChangeStyles(state, targets, hover)
+        ? loopThroughHandlesAndChangeStyles(state, targets, nodeId, hover)
         : [];
-      console.log(newTargets);
       updatedNode.__rf.handleBounds.target = newTargets;
 
       res.push(updatedNode);
@@ -105,7 +100,10 @@ export function changeOnClick(
   return nextNodes;
 }
 
-export function toggleOnDrag(state: ReactFlowState, toggle: boolean): Node[] {
+export function toggleOnDrag(
+  state: ReactFlowState,
+  toggle: boolean | undefined = false
+): Node[] {
   const nextNodes: Node[] = state.nodes.reduce((res, node): Node[] => {
     if (node.id !== state.connectionNodeId) {
       const updatedNode = {
@@ -115,12 +113,19 @@ export function toggleOnDrag(state: ReactFlowState, toggle: boolean): Node[] {
         },
       };
       const targets: HandleBounds[] = updatedNode.__rf.handleBounds.target;
+      var singleTargetHandleConnected = false;
+      if (updatedNode.type === "singleTargetNode") {
+        const connected = targets.find((target) =>
+          checkHandlesConnected(state, String(target.id), updatedNode.id)
+        );
+        connected ? (singleTargetHandleConnected = true) : null;
+      }
       if (targets) {
         const newTargets = targets.reduce((res, target): HandleBounds[] => {
           if (
             !checkHandlesConnected(state, String(target.id), updatedNode.id)
           ) {
-            if (toggle) {
+            if (toggle || singleTargetHandleConnected) {
               target.styles = [`react-flow__handle-${target.id}-hide`];
             } else target.styles = [];
           }

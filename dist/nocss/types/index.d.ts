@@ -1,5 +1,5 @@
-import React, { CSSProperties, MouseEvent as ReactMouseEvent, HTMLAttributes, ReactNode } from 'react';
-import { Selection as D3Selection, ZoomBehavior } from 'd3';
+import React, { CSSProperties, MouseEvent as ReactMouseEvent, HTMLAttributes, ReactNode } from "react";
+import { Selection as D3Selection, ZoomBehavior } from "d3";
 export declare type ElementId = string;
 export declare type FlowElement<T = any> = Node<T> | Edge<T>;
 export declare type Elements<T = any> = Array<FlowElement<T>>;
@@ -68,7 +68,7 @@ export declare enum BackgroundVariant {
     Lines = "lines",
     Dots = "dots"
 }
-export declare type HandleType = 'source' | 'target';
+export declare type HandleType = "source" | "target";
 export declare type NodeTypesType = {
     [key: string]: ReactNode;
 };
@@ -378,3 +378,6 @@ export interface ReactFlowState {
     onConnectEnd?: OnConnectEndFunc;
 }
 export declare type UpdateNodeInternals = (nodeId: ElementId) => void;
+export interface HandleBounds extends HandleElement {
+    styles: String[] | null;
+}
