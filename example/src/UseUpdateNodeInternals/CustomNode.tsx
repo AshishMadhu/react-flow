@@ -9,9 +9,23 @@ const CustomNode: FC<NodeProps> = ({ data }) => {
     () =>
       Array.from({ length: data.handleCount }, (x, i) => {
         const handleId = `handle-${i}`;
+<<<<<<< HEAD
         return <Handle key={handleId} type="source" position={Position.Right} id={handleId} style={{ top: 10 * i }} />;
       }),
     [data.handleCount]
+=======
+        return (
+          <Handle
+            key={handleId}
+            type="source"
+            position={Position.Right}
+            id={handleId}
+            style={{ top: 10 * i + data.handlePosition * 10 }}
+          />
+        );
+      }),
+    [data.handleCount, data.handlePosition]
+>>>>>>> 0950e52f9368e1f86a3c992c0e3a6617b12bacb4
   );
 
   return (

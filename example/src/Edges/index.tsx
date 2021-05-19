@@ -17,6 +17,10 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 
 import CustomEdge from './CustomEdge';
+<<<<<<< HEAD
+=======
+import CustomEdge2 from './CustomEdge2';
+>>>>>>> 0950e52f9368e1f86a3c992c0e3a6617b12bacb4
 
 const onLoad = (reactFlowInstance: OnLoadParams) => reactFlowInstance.fitView();
 const onNodeDragStop = (_: MouseEvent, node: Node) => console.log('drag stop', node);
@@ -33,6 +37,10 @@ const initialElements: Elements = [
   { id: '6', type: 'output', data: { label: 'Output 6' }, position: { x: 50, y: 550 } },
   { id: '7', type: 'output', data: { label: 'Output 7' }, position: { x: 250, y: 550 } },
   { id: '8', type: 'output', data: { label: 'Output 8' }, position: { x: 525, y: 600 } },
+<<<<<<< HEAD
+=======
+  { id: '9', type: 'output', data: { label: 'Output 9' }, position: { x: 675, y: 500 } },
+>>>>>>> 0950e52f9368e1f86a3c992c0e3a6617b12bacb4
   { id: 'e1-2', source: '1', target: '2', label: 'bezier edge (default)', className: 'normal-edge' },
   { id: 'e2-2a', source: '2', target: '2a', type: 'smoothstep', label: 'smoothstep edge' },
   { id: 'e2-3', source: '2', target: '3', type: 'step', label: 'step edge' },
@@ -72,10 +80,24 @@ const initialElements: Elements = [
     data: { text: 'custom edge' },
     arrowHeadType: ArrowHeadType.ArrowClosed,
   },
+<<<<<<< HEAD
+=======
+  {
+    id: 'e5-9',
+    source: '5',
+    target: '9',
+    type: 'custom2',
+    data: { text: 'custom edge 2' },
+  },
+>>>>>>> 0950e52f9368e1f86a3c992c0e3a6617b12bacb4
 ];
 
 const edgeTypes: EdgeTypesType = {
   custom: CustomEdge,
+<<<<<<< HEAD
+=======
+  custom2: CustomEdge2,
+>>>>>>> 0950e52f9368e1f86a3c992c0e3a6617b12bacb4
 };
 
 const EdgesFlow = () => {

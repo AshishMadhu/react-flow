@@ -34,6 +34,7 @@ interface EdgeRendererProps {
   onEdgeMouseEnter?: (event: React.MouseEvent, edge: Edge) => void;
   onEdgeMouseMove?: (event: React.MouseEvent, edge: Edge) => void;
   onEdgeMouseLeave?: (event: React.MouseEvent, edge: Edge) => void;
+  onEdgeUpdateStart?: (event: React.MouseEvent, edge: Edge) => void;
   edgeUpdaterRadius?: number;
 }
 
@@ -90,6 +91,7 @@ const Edge = ({
   if (!sourceNode.__rf.width || !targetNode.__rf.width) {
     return null;
   }
+
   const edgeType = edge.type || 'default';
   const EdgeComponent = props.edgeTypes[edgeType] || props.edgeTypes.default;
   const targetNodeBounds = targetNode.__rf.handleBounds;
@@ -180,6 +182,7 @@ const Edge = ({
       onMouseLeave={props.onEdgeMouseLeave}
       edgeUpdaterRadius={props.edgeUpdaterRadius}
       onEdgeDoubleClick={props.onEdgeDoubleClick}
+      onEdgeUpdateStart={props.onEdgeUpdateStart}
     />
   );
 };

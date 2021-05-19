@@ -48,14 +48,14 @@ export default ({
     const nextSourceNode = nodes.find((n) => n.id === nodeId) || null;
     setSourceNode(nextSourceNode);
   }, []);
+
   if (!sourceNode || !isConnectable) {
     return null;
   }
+
   const sourceHandle = handleId
     ? sourceNode.__rf.handleBounds[connectionHandleType].find((d: HandleElement) => d.id === handleId)
     : sourceNode.__rf.handleBounds[connectionHandleType][0];
-  if(handleId) {
-  }
   const sourceHandleX = sourceHandle ? sourceHandle.x + sourceHandle.width / 2 : sourceNode.__rf.width / 2;
   const sourceHandleY = sourceHandle ? sourceHandle.y + sourceHandle.height / 2 : sourceNode.__rf.height;
   const sourceX = sourceNode.__rf.position.x + sourceHandleX;

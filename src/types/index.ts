@@ -1,10 +1,5 @@
-import React, {
-  CSSProperties,
-  MouseEvent as ReactMouseEvent,
-  HTMLAttributes,
-  ReactNode,
-} from "react";
-import { Selection as D3Selection, ZoomBehavior } from "d3";
+import React, { CSSProperties, MouseEvent as ReactMouseEvent, HTMLAttributes, ReactNode } from 'react';
+import { Selection as D3Selection, ZoomBehavior } from 'd3';
 
 export type ElementId = string;
 
@@ -15,10 +10,10 @@ export type Elements<T = any> = Array<FlowElement<T>>;
 export type Transform = [number, number, number];
 
 export enum Position {
-  Left = "left",
-  Top = "top",
-  Right = "right",
-  Bottom = "bottom",
+  Left = 'left',
+  Top = 'top',
+  Right = 'right',
+  Bottom = 'bottom',
 }
 
 export interface XYPosition {
@@ -57,8 +52,8 @@ export interface Node<T = any> {
 }
 
 export enum ArrowHeadType {
-  Arrow = "arrow",
-  ArrowClosed = "arrowclosed",
+  Arrow = 'arrow',
+  ArrowClosed = 'arrowclosed',
 }
 
 export interface Edge<T = any> {
@@ -83,11 +78,11 @@ export interface Edge<T = any> {
 }
 
 export enum BackgroundVariant {
-  Lines = "lines",
-  Dots = "dots",
+  Lines = 'lines',
+  Dots = 'dots',
 }
 
-export type HandleType = "source" | "target";
+export type HandleType = 'source' | 'target';
 
 export type NodeTypesType = { [key: string]: ReactNode };
 
@@ -136,6 +131,7 @@ export interface WrapEdgeProps<T = any> {
   onMouseMove?: (event: React.MouseEvent, edge: Edge) => void;
   onMouseLeave?: (event: React.MouseEvent, edge: Edge) => void;
   edgeUpdaterRadius?: number;
+  onEdgeUpdateStart?: (event: React.MouseEvent, edge: Edge) => void;
 }
 
 export interface EdgeProps<T = any> {
@@ -284,15 +280,15 @@ export interface Connection {
 }
 
 export enum ConnectionMode {
-  Strict = "strict",
-  Loose = "loose",
+  Strict = 'strict',
+  Loose = 'loose',
 }
 
 export enum ConnectionLineType {
-  Bezier = "default",
-  Straight = "straight",
-  Step = "step",
-  SmoothStep = "smoothstep",
+  Bezier = 'default',
+  Straight = 'straight',
+  Step = 'step',
+  SmoothStep = 'smoothstep',
 }
 
 export type ConnectionLineComponentProps = {
@@ -314,10 +310,7 @@ export type OnConnectStartParams = {
   handleId: ElementId | null;
   handleType: HandleType | null;
 };
-export type OnConnectStartFunc = (
-  event: ReactMouseEvent,
-  params: OnConnectStartParams
-) => void;
+export type OnConnectStartFunc = (event: ReactMouseEvent, params: OnConnectStartParams) => void;
 export type OnConnectStopFunc = (event: MouseEvent) => void;
 export type OnConnectEndFunc = (event: MouseEvent) => void;
 
@@ -364,9 +357,9 @@ export type NodeExtent = TranslateExtent;
 export type KeyCode = number | string;
 
 export enum PanOnScrollMode {
-  Free = "free",
-  Vertical = "vertical",
-  Horizontal = "horizontal",
+  Free = 'free',
+  Vertical = 'vertical',
+  Horizontal = 'horizontal',
 }
 
 export interface ZoomPanHelperFunctions {
@@ -381,10 +374,7 @@ export interface ZoomPanHelperFunctions {
   initialized: boolean;
 }
 
-export type OnEdgeUpdateFunc<T = any> = (
-  oldEdge: Edge<T>,
-  newConnection: Connection
-) => void;
+export type OnEdgeUpdateFunc<T = any> = (oldEdge: Edge<T>, newConnection: Connection) => void;
 
 export type NodeDimensionUpdate = {
   id: ElementId;

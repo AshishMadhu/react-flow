@@ -3,7 +3,6 @@ import ReactFlow from './container/ReactFlow';
 export default ReactFlow;
 
 export { default as Handle } from './components/Handle';
-// export {default as DynamicHandle} from './components/Handle/DynamicHandle';
 export { default as EdgeText } from './components/Edges/EdgeText';
 export { getBezierPath } from './components/Edges/BezierEdge';
 export { getSmoothStepPath } from './components/Edges/SmoothStepEdge';

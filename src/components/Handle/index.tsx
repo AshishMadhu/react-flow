@@ -1,22 +1,16 @@
-import React, {
-  memo,
-  useContext,
-  useCallback,
-  FC,
-  HTMLAttributes,
-} from "react";
-import cc from "classcat";
+import React, { memo, useContext, useCallback, FC, HTMLAttributes } from 'react';
+import cc from 'classcat';
 
-import { useStoreActions, useStoreState } from "../../store/hooks";
-import NodeIdContext from "../../contexts/NodeIdContext";
-import { HandleProps, Connection, ElementId, Position } from "../../types";
+import { useStoreActions, useStoreState } from '../../store/hooks';
+import NodeIdContext from '../../contexts/NodeIdContext';
+import { HandleProps, Connection, ElementId, Position } from '../../types';
 
-import { onMouseDown, SetSourceIdFunc, SetPosition } from "./handler";
+import { onMouseDown, SetSourceIdFunc, SetPosition } from './handler';
 
 const alwaysValid = () => true;
 
-const Handle: FC<HandleProps & Omit<HTMLAttributes<HTMLDivElement>, "id">> = ({
-  type = "source",
+const Handle: FC<HandleProps & Omit<HTMLAttributes<HTMLDivElement>, 'id'>> = ({
+  type = 'source',
   position = Position.Top,
   isValidConnection = alwaysValid,
   isConnectable = true,
@@ -27,19 +21,15 @@ const Handle: FC<HandleProps & Omit<HTMLAttributes<HTMLDivElement>, "id">> = ({
   ...rest
 }) => {
   const nodeId = useContext(NodeIdContext) as ElementId;
-  const setPosition = useStoreActions(
-    (actions) => actions.setConnectionPosition
-  );
-  const setConnectionNodeId = useStoreActions(
-    (actions) => actions.setConnectionNodeId
-  );
+  const setPosition = useStoreActions((actions) => actions.setConnectionPosition);
+  const setConnectionNodeId = useStoreActions((actions) => actions.setConnectionNodeId);
   const onConnectAction = useStoreState((state) => state.onConnect);
   const onConnectStart = useStoreState((state) => state.onConnectStart);
   const onConnectStop = useStoreState((state) => state.onConnectStop);
   const onConnectEnd = useStoreState((state) => state.onConnectEnd);
   const connectionMode = useStoreState((state) => state.connectionMode);
   const handleId = id || null;
-  const isTarget = type === "target";
+  const isTarget = type === 'target';
 
   const onConnectExtended = useCallback(
     (params: Connection) => {
@@ -82,9 +72,9 @@ const Handle: FC<HandleProps & Omit<HTMLAttributes<HTMLDivElement>, "id">> = ({
   );
 
   const handleClasses = cc([
-    "react-flow__handle",
+    'react-flow__handle',
     `react-flow__handle-${position}`,
-    "nodrag",
+    'nodrag',
     className,
     {
       source: !isTarget,
@@ -107,6 +97,6 @@ const Handle: FC<HandleProps & Omit<HTMLAttributes<HTMLDivElement>, "id">> = ({
   );
 };
 
-Handle.displayName = "Handle";
+Handle.displayName = 'Handle';
 
 export default memo(Handle);
