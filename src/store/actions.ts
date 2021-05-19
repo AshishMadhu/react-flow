@@ -24,20 +24,19 @@ import {
 import * as constants from "./contants";
 
 type SetChangeHandleStyleType = {
-  actions: String,
-  toggle?: boolean,
-  nodeId?: string | null,
-  hover?:boolean|undefined,
-}
+  actions: String;
+  toggle?: boolean;
+  nodeId?: string | null;
+  hover?: boolean | undefined;
+};
 
-export const setChangeHandleStyle = (
-  data: SetChangeHandleStyleType
-) => createAction(constants.CHANGE_HANDLE_STYLE, { data });
+export const setChangeHandleStyle = (data: SetChangeHandleStyleType) =>
+  createAction(constants.CHANGE_HANDLE_STYLE, { data });
 
 export const setToggleTarget = (
   nodeId: ElementId,
   handleBoundsId: String | null,
-  elementBelow: Element | null
+  elementBelow?: Element | null,
 ) =>
   createAction(constants.TOGGLE_TARGET, {
     nodeId,

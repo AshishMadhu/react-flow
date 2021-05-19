@@ -47,7 +47,10 @@ export default function reactFlowReducer(
           return state;
         }
         case onClick: {
-          const nextNodes = changeOnClickAndHoverHandler(state, state.connectionNodeId);
+          const nextNodes = changeOnClickAndHoverHandler(
+            state,
+            state.connectionNodeId
+          );
           return { ...state, nodes: nextNodes };
         }
         case onHover: {
@@ -92,14 +95,16 @@ export default function reactFlowReducer(
                 edge.sourceHandle === foundHandleSource.id
             );
             if (!connected) {
-              toggleTargetClass(elementBelow);
+              if (!elementBelow)
+                console.log("source not connected and toggled");
+              elementBelow ? toggleTargetClass(elementBelow) : null;
               const sources = updatedNode.__rf.handleBounds.source.filter(
                 (source: any) => source.id !== handleBoundsId
               );
 
               updatedNode.__rf.handleBounds.source = sources;
               updatedNode.__rf.handleBounds.target.push(foundHandleSource);
-            }
+            } 
           } else if (foundHandleTarget) {
             //check connections
             const connected = state.edges.find(
@@ -111,7 +116,7 @@ export default function reactFlowReducer(
               ? ""
               : (updatedNode.__rf.handleBounds.source = []);
             if (!connected) {
-              toggleTargetClass(elementBelow);
+              elementBelow ? toggleTargetClass(elementBelow) : null;
               const targets = updatedNode.__rf.handleBounds.target.filter(
                 (target: any) => target.id !== handleBoundsId
               );

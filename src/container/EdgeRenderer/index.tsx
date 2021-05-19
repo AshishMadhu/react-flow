@@ -66,6 +66,7 @@ const Edge = ({
   const targetHandleId = edge.targetHandle || null;
   const { sourceNode, targetNode } = getSourceTargetNodes(edge, nodes);
 
+  const state = useStore().getState()
   const onConnectEdge = useCallback(
     (connection: Connection) => {
       props.onEdgeUpdate?.(edge, connection);
@@ -74,11 +75,13 @@ const Edge = ({
   );
 
   if (!sourceNode) {
+    console.log(state, 'lib state');
     console.warn(`couldn't create edge for source id: ${edge.source}; edge id: ${edge.id}`);
     return null;
   }
 
   if (!targetNode) {
+    console.log(state, 'lib state');
     console.warn(`couldn't create edge for target id: ${edge.target}; edge id: ${edge.id}`);
     return null;
   }
@@ -87,7 +90,6 @@ const Edge = ({
   if (!sourceNode.__rf.width || !targetNode.__rf.width) {
     return null;
   }
-
   const edgeType = edge.type || 'default';
   const EdgeComponent = props.edgeTypes[edgeType] || props.edgeTypes.default;
   const targetNodeBounds = targetNode.__rf.handleBounds;
@@ -104,11 +106,12 @@ const Edge = ({
   const store = useStore().getState();
 
   if (!sourceHandle) {
+    console.log(state, 'lib state');
     console.warn(`couldn't create edge for source handle id: ${sourceHandleId}; edge id: ${edge.id}`);
     return null;
   }
   if (!targetHandle) {
-    console.log(store);
+    console.log(store, 'lib state');
     console.warn(`couldn't create edge for target handle id: ${targetHandleId}; edge id: ${edge.id}`);
     return null;
   }

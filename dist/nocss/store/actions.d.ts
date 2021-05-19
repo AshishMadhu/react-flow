@@ -11,12 +11,12 @@ export declare const setChangeHandleStyle: (data: SetChangeHandleStyleType) => {
         data: SetChangeHandleStyleType;
     };
 };
-export declare const setToggleTarget: (nodeId: ElementId, handleBoundsId: String | null, elementBelow: Element | null) => {
+export declare const setToggleTarget: (nodeId: ElementId, handleBoundsId: String | null, elementBelow?: Element | null | undefined) => {
     type: "TOGGLE_TARGET";
     payload: {
         nodeId: string;
         handleBoundsId: String | null;
-        elementBelow: Element | null;
+        elementBelow: Element | null | undefined;
     };
 };
 export declare const setOnConnect: (onConnect: OnConnectFunc) => {
