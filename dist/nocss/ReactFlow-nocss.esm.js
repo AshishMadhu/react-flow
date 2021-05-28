@@ -2248,6 +2248,7 @@ var SET_ON_CONNECT_STOP = 'SET_ON_CONNECT_STOP';
 var SET_ON_CONNECT_END = 'SET_ON_CONNECT_END';
 var SET_ELEMENTS = 'SET_ELEMENTS';
 var TOGGLE_TARGET = 'TOGGLE_TARGET';
+var SOURCE_TO_TARGET = 'SOURCE_TO_TARGET';
 var CHANGE_HANDLE_STYLE = 'CHANGE_HANDLE_STYLE';
 var UPDATE_NODE_DIMENSIONS = 'UPDATE_NODE_DIMENSIONS';
 var UPDATE_NODE_POS = 'UPDATE_NODE_POS';
@@ -2281,6 +2282,13 @@ var SET_NODE_EXTENT = 'SET_NODE_EXTENT';
 var setChangeHandleStyle = function setChangeHandleStyle(data) {
   return createAction(CHANGE_HANDLE_STYLE, {
     data: data
+  });
+}; // this action will set the passed target to source and delete the edge if it is connected
+
+var setSourceToTarget = function setSourceToTarget(nodeId, handleBoundsId) {
+  return createAction(SOURCE_TO_TARGET, {
+    nodeId: nodeId,
+    handleBoundsId: handleBoundsId
   });
 };
 var setToggleTarget = function setToggleTarget(nodeId, handleBoundsId, elementBelow) {
@@ -2432,6 +2440,7 @@ var setNodeExtent = function setNodeExtent(nodeExtent) {
 var actions = /*#__PURE__*/Object.freeze({
   __proto__: null,
   setChangeHandleStyle: setChangeHandleStyle,
+  setSourceToTarget: setSourceToTarget,
   setToggleTarget: setToggleTarget,
   setOnConnect: setOnConnect,
   setOnConnectStart: setOnConnectStart,
@@ -10913,8 +10922,8 @@ function ownKeys$1(object, enumerableOnly) { var keys = Object.keys(object); if 
 function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$1(Object(source), true).forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$1(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var toggleTargetClass = function toggleTargetClass(elementBelow) {
-  var elementBelowIsTarget = elementBelow === null || elementBelow === void 0 ? void 0 : elementBelow.classList.contains("target");
-  elementBelowIsTarget ? elementBelow === null || elementBelow === void 0 ? void 0 : elementBelow.classList.replace("target", "source") : elementBelow === null || elementBelow === void 0 ? void 0 : elementBelow.classList.replace("source", "target");
+  var elementBelowIsTarget = elementBelow === null || elementBelow === void 0 ? void 0 : elementBelow.classList.contains('target');
+  elementBelowIsTarget ? elementBelow === null || elementBelow === void 0 ? void 0 : elementBelow.classList.replace('target', 'source') : elementBelow === null || elementBelow === void 0 ? void 0 : elementBelow.classList.replace('source', 'target');
 };
 
 function reactFlowReducer() {
@@ -10924,9 +10933,9 @@ function reactFlowReducer() {
   switch (action.type) {
     case CHANGE_HANDLE_STYLE:
       {
-        var onDrag = "onDrag",
-            onClick = "onClick",
-            onHover = "onHover";
+        var onDrag = 'onDrag',
+            onClick = 'onClick',
+            onHover = 'onHover';
 
         switch (action.payload.data.actions) {
           case onDrag:
@@ -10959,13 +10968,61 @@ function reactFlowReducer() {
         }
       }
 
+    case SOURCE_TO_TARGET:
+      {
+        var sourceHandleId = action.payload.handleBoundsId;
+
+        var newEdges = _toConsumableArray(state.edges);
+
+        var _nextNodes2 = state.nodes.reduce(function (res, node) {
+          if (node.id === action.payload.nodeId) {
+            var updatedNode = _objectSpread$1(_objectSpread$1({}, node), {}, {
+              __rf: _objectSpread$1({}, node.__rf)
+            });
+
+            var sourceHandle = updatedNode.__rf.handleBounds.source.find(function (s) {
+              return s.id === sourceHandleId;
+            });
+
+            if (sourceHandle) {
+              var _updatedNode$__rf$han;
+
+              var connected = state.edges.find(function (edge) {
+                return edge.source === action.payload.nodeId && edge.sourceHandle === sourceHandleId;
+              });
+              if (connected) newEdges = newEdges.filter(function (edge) {
+                return edge.source !== action.payload.nodeId && edge.sourceHandle !== sourceHandle;
+              });
+
+              updatedNode.__rf.handleBounds.target.push(sourceHandle);
+
+              var nextSourceHandles = (_updatedNode$__rf$han = updatedNode.__rf.handleBounds.source) === null || _updatedNode$__rf$han === void 0 ? void 0 : _updatedNode$__rf$han.filter(function (s) {
+                return s.id !== sourceHandleId;
+              });
+              updatedNode.__rf.handleBounds.source = nextSourceHandles;
+            }
+
+            res.push(updatedNode);
+          } else {
+            res.push(node);
+          }
+
+          return res;
+        }, []);
+
+        return _objectSpread$1(_objectSpread$1({}, state), {}, {
+          nodes: _nextNodes2,
+          edges: newEdges
+        });
+      }
+
     case TOGGLE_TARGET:
       {
         var targetNodeId = action.payload.nodeId;
         var handleBoundsId = action.payload.handleBoundsId;
         var elementBelow = action.payload.elementBelow;
 
-        var _nextNodes2 = state.nodes.reduce(function (res, node) {
+        var _nextNodes3 = state.nodes.reduce(function (res, node) {
           if (node.id === targetNodeId) {
             var updatedNode = _objectSpread$1(_objectSpread$1({}, node), {}, {
               __rf: _objectSpread$1({}, node.__rf)
@@ -10986,7 +11043,6 @@ function reactFlowReducer() {
               });
 
               if (!connected) {
-                if (!elementBelow) console.log("source not connected and toggled");
                 elementBelow ? toggleTargetClass(elementBelow) : null;
 
                 var sources = updatedNode.__rf.handleBounds.source.filter(function (source) {
@@ -11003,7 +11059,7 @@ function reactFlowReducer() {
                 return edge.target === targetNodeId && edge.targetHandle === foundHandleTarget.id;
               });
 
-              updatedNode.__rf.handleBounds.source ? "" : updatedNode.__rf.handleBounds.source = [];
+              updatedNode.__rf.handleBounds.source ? '' : updatedNode.__rf.handleBounds.source = [];
 
               if (!_connected) {
                 elementBelow ? toggleTargetClass(elementBelow) : null;
@@ -11025,7 +11081,7 @@ function reactFlowReducer() {
         }, []);
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes2
+          nodes: _nextNodes3
         });
       }
 
@@ -11074,11 +11130,11 @@ function reactFlowReducer() {
 
           return res;
         }, nextElements),
-            _nextNodes3 = _propElements$reduce.nextNodes,
+            _nextNodes4 = _propElements$reduce.nextNodes,
             nextEdges = _propElements$reduce.nextEdges;
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes3,
+          nodes: _nextNodes4,
           edges: nextEdges
         });
       }
@@ -11129,7 +11185,7 @@ function reactFlowReducer() {
           };
         }
 
-        var _nextNodes4 = state.nodes.map(function (node) {
+        var _nextNodes5 = state.nodes.map(function (node) {
           if (node.id === id) {
             return _objectSpread$1(_objectSpread$1({}, node), {}, {
               __rf: _objectSpread$1(_objectSpread$1({}, node.__rf), {}, {
@@ -11142,7 +11198,7 @@ function reactFlowReducer() {
         });
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes4
+          nodes: _nextNodes5
         });
       }
 
@@ -11153,7 +11209,7 @@ function reactFlowReducer() {
             diff = _action$payload2.diff,
             isDragging = _action$payload2.isDragging;
 
-        var _nextNodes5 = state.nodes.map(function (node) {
+        var _nextNodes6 = state.nodes.map(function (node) {
           var _state$selectedElemen;
 
           if (_id === node.id || (_state$selectedElemen = state.selectedElements) !== null && _state$selectedElemen !== void 0 && _state$selectedElemen.find(function (sNode) {
@@ -11179,7 +11235,7 @@ function reactFlowReducer() {
         });
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes5
+          nodes: _nextNodes6
         });
       }
 

@@ -9,16 +9,16 @@ import {
   isEdge,
   parseNode,
   parseEdge,
-} from "../utils/graph";
-import { getHandleBounds } from "../components/Nodes/utils";
+} from '../utils/graph';
+import { getHandleBounds } from '../components/Nodes/utils';
 
-import { ReactFlowState, Node, XYPosition, Edge } from "../types";
-import * as constants from "./contants";
-import { ReactFlowAction } from "./actions";
+import { ReactFlowState, Node, XYPosition, Edge, HandleElement } from '../types';
+import * as constants from './contants';
+import { ReactFlowAction } from './actions';
 
-import { initialState } from "./index";
+import { initialState } from './index';
 
-import { changeOnClickAndHoverHandler, toggleOnDrag } from "./utils";
+import { changeOnClickAndHoverHandler, toggleOnDrag } from './utils';
 
 type NextElements = {
   nextNodes: Node[];
@@ -26,45 +26,75 @@ type NextElements = {
 };
 
 const toggleTargetClass = (elementBelow: Element | null) => {
-  var elementBelowIsTarget = elementBelow?.classList.contains("target");
+  var elementBelowIsTarget = elementBelow?.classList.contains('target');
   elementBelowIsTarget
-    ? elementBelow?.classList.replace("target", "source")
-    : elementBelow?.classList.replace("source", "target");
+    ? elementBelow?.classList.replace('target', 'source')
+    : elementBelow?.classList.replace('source', 'target');
 };
 
-export default function reactFlowReducer(
-  state = initialState,
-  action: ReactFlowAction
-): ReactFlowState {
+export default function reactFlowReducer(state = initialState, action: ReactFlowAction): ReactFlowState {
   switch (action.type) {
     case constants.CHANGE_HANDLE_STYLE: {
-      const onDrag = "onDrag",
-        onClick = "onClick",
-        onHover = "onHover";
+      const onDrag = 'onDrag',
+        onClick = 'onClick',
+        onHover = 'onHover';
       switch (action.payload.data.actions) {
         case onDrag: {
           toggleOnDrag(state, action.payload.data.toggle);
           return state;
         }
         case onClick: {
-          const nextNodes = changeOnClickAndHoverHandler(
-            state,
-            state.connectionNodeId
-          );
+          const nextNodes = changeOnClickAndHoverHandler(state, state.connectionNodeId);
           return { ...state, nodes: nextNodes };
         }
         case onHover: {
-          const nextNodes = changeOnClickAndHoverHandler(
-            state,
-            action.payload.data.nodeId,
-            action.payload.data.hover
-          );
+          const nextNodes = changeOnClickAndHoverHandler(state, action.payload.data.nodeId, action.payload.data.hover);
           return { ...state, nodes: nextNodes };
         }
         default: {
           return state;
         }
       }
+    }
+    case constants.SOURCE_TO_TARGET: {
+      const sourceHandleId = action.payload.handleBoundsId;
+      var newEdges = [
+        ...state.edges
+      ]
+      const nextNodes: Node[] = state.nodes.reduce((res, node): Node[] => {
+        if (node.id === action.payload.nodeId) {
+          const updatedNode = {
+            ...node,
+            __rf: {
+              ...node.__rf,
+            },
+          };
+          const sourceHandle = updatedNode.__rf.handleBounds.source.find((s: HandleElement) => s.id === sourceHandleId);
+          if (sourceHandle) {
+            const connected = state.edges.find(
+              (edge) => edge.source === action.payload.nodeId && edge.sourceHandle === sourceHandleId
+            );
+            if (connected)
+              newEdges = newEdges.filter(
+                (edge) => edge.source !== action.payload.nodeId && edge.sourceHandle !== sourceHandle
+              );
+            updatedNode.__rf.handleBounds.target.push(sourceHandle);
+            const nextSourceHandles = updatedNode.__rf.handleBounds.source?.filter(
+              (s: HandleElement) => s.id !== sourceHandleId
+            );
+            updatedNode.__rf.handleBounds.source = nextSourceHandles;
+          }
+          res.push(updatedNode);
+        } else {
+          res.push(node);
+        }
+        return res;
+      }, [] as Node[]);
+      return {
+        ...state,
+        nodes: nextNodes,
+        edges: newEdges,
+      };
     }
     case constants.TOGGLE_TARGET: {
       const targetNodeId = action.payload.nodeId;
@@ -79,9 +109,7 @@ export default function reactFlowReducer(
             },
           };
           var foundHandleSource = updatedNode.__rf.handleBounds.source
-            ? updatedNode.__rf.handleBounds.source.find(
-                (s: { id: String | null }) => s.id === handleBoundsId
-              )
+            ? updatedNode.__rf.handleBounds.source.find((s: { id: String | null }) => s.id === handleBoundsId)
             : false;
 
           const foundHandleTarget = updatedNode.__rf.handleBounds.target.find(
@@ -90,13 +118,9 @@ export default function reactFlowReducer(
           if (foundHandleSource) {
             //check connections
             const connected = state.edges.find(
-              (edge) =>
-                edge.source === targetNodeId &&
-                edge.sourceHandle === foundHandleSource.id
+              (edge) => edge.source === targetNodeId && edge.sourceHandle === foundHandleSource.id
             );
             if (!connected) {
-              if (!elementBelow)
-                console.log("source not connected and toggled");
               elementBelow ? toggleTargetClass(elementBelow) : null;
               const sources = updatedNode.__rf.handleBounds.source.filter(
                 (source: any) => source.id !== handleBoundsId
@@ -104,17 +128,13 @@ export default function reactFlowReducer(
 
               updatedNode.__rf.handleBounds.source = sources;
               updatedNode.__rf.handleBounds.target.push(foundHandleSource);
-            } 
+            }
           } else if (foundHandleTarget) {
             //check connections
             const connected = state.edges.find(
-              (edge) =>
-                edge.target === targetNodeId &&
-                edge.targetHandle === foundHandleTarget.id
+              (edge) => edge.target === targetNodeId && edge.targetHandle === foundHandleTarget.id
             );
-            updatedNode.__rf.handleBounds.source
-              ? ""
-              : (updatedNode.__rf.handleBounds.source = []);
+            updatedNode.__rf.handleBounds.source ? '' : (updatedNode.__rf.handleBounds.source = []);
             if (!connected) {
               elementBelow ? toggleTargetClass(elementBelow) : null;
               const targets = updatedNode.__rf.handleBounds.target.filter(

@@ -1,4 +1,4 @@
-import { Elements, OnConnectEndFunc, OnConnectFunc, OnConnectStartFunc, OnConnectStopFunc, NodeDimensionUpdate, NodePosUpdate, NodeDiffUpdate, XYPosition, Transform, Dimensions, InitD3ZoomPayload, TranslateExtent, SetConnectionId, SnapGrid, ConnectionMode, ElementId } from "../types";
+import { Elements, OnConnectEndFunc, OnConnectFunc, OnConnectStartFunc, OnConnectStopFunc, NodeDimensionUpdate, NodePosUpdate, NodeDiffUpdate, XYPosition, Transform, Dimensions, InitD3ZoomPayload, TranslateExtent, SetConnectionId, SnapGrid, ConnectionMode, ElementId } from '../types';
 declare type SetChangeHandleStyleType = {
     actions: String;
     toggle?: boolean;
@@ -9,6 +9,13 @@ export declare const setChangeHandleStyle: (data: SetChangeHandleStyleType) => {
     type: "CHANGE_HANDLE_STYLE";
     payload: {
         data: SetChangeHandleStyleType;
+    };
+};
+export declare const setSourceToTarget: (nodeId: ElementId, handleBoundsId: ElementId) => {
+    type: "SOURCE_TO_TARGET";
+    payload: {
+        nodeId: string;
+        handleBoundsId: string;
     };
 };
 export declare const setToggleTarget: (nodeId: ElementId, handleBoundsId: String | null, elementBelow?: Element | null | undefined) => {
@@ -189,5 +196,5 @@ export declare const setNodeExtent: (nodeExtent: TranslateExtent) => {
     type: "SET_NODE_EXTENT";
     payload: TranslateExtent;
 };
-export declare type ReactFlowAction = ReturnType<typeof setToggleTarget | typeof setChangeHandleStyle | typeof setOnConnect | typeof setOnConnectStart | typeof setOnConnectStop | typeof setOnConnectEnd | typeof setElements | typeof updateNodeDimensions | typeof updateNodePos | typeof updateNodePosDiff | typeof setUserSelection | typeof updateUserSelection | typeof unsetUserSelection | typeof setSelection | typeof unsetNodesSelection | typeof resetSelectedElements | typeof setSelectedElements | typeof addSelectedElements | typeof updateTransform | typeof updateSize | typeof initD3Zoom | typeof setMinZoom | typeof setMaxZoom | typeof setTranslateExtent | typeof setConnectionPosition | typeof setConnectionNodeId | typeof setSnapToGrid | typeof setSnapGrid | typeof setInteractive | typeof setNodesDraggable | typeof setNodesConnectable | typeof setElementsSelectable | typeof setMultiSelectionActive | typeof setConnectionMode | typeof setNodeExtent>;
+export declare type ReactFlowAction = ReturnType<typeof setSourceToTarget | typeof setToggleTarget | typeof setChangeHandleStyle | typeof setOnConnect | typeof setOnConnectStart | typeof setOnConnectStop | typeof setOnConnectEnd | typeof setElements | typeof updateNodeDimensions | typeof updateNodePos | typeof updateNodePosDiff | typeof setUserSelection | typeof updateUserSelection | typeof unsetUserSelection | typeof setSelection | typeof unsetNodesSelection | typeof resetSelectedElements | typeof setSelectedElements | typeof addSelectedElements | typeof updateTransform | typeof updateSize | typeof initD3Zoom | typeof setMinZoom | typeof setMaxZoom | typeof setTranslateExtent | typeof setConnectionPosition | typeof setConnectionNodeId | typeof setSnapToGrid | typeof setSnapGrid | typeof setInteractive | typeof setNodesDraggable | typeof setNodesConnectable | typeof setElementsSelectable | typeof setMultiSelectionActive | typeof setConnectionMode | typeof setNodeExtent>;
 export {};

@@ -19,9 +19,9 @@ import {
   ConnectionMode,
   NodeExtent,
   ElementId,
-} from "../types";
+} from '../types';
 
-import * as constants from "./contants";
+import * as constants from './contants';
 
 type SetChangeHandleStyleType = {
   actions: String;
@@ -33,11 +33,14 @@ type SetChangeHandleStyleType = {
 export const setChangeHandleStyle = (data: SetChangeHandleStyleType) =>
   createAction(constants.CHANGE_HANDLE_STYLE, { data });
 
-export const setToggleTarget = (
-  nodeId: ElementId,
-  handleBoundsId: String | null,
-  elementBelow?: Element | null,
-) =>
+// this action will set the passed target to source and delete the edge if it is connected
+export const setSourceToTarget = (nodeId: ElementId, handleBoundsId: ElementId) =>
+  createAction(constants.SOURCE_TO_TARGET, {
+    nodeId,
+    handleBoundsId,
+  });
+
+export const setToggleTarget = (nodeId: ElementId, handleBoundsId: String | null, elementBelow?: Element | null) =>
   createAction(constants.TOGGLE_TARGET, {
     nodeId,
     handleBoundsId,
@@ -149,6 +152,7 @@ export const setConnectionMode = (connectionMode: ConnectionMode) =>
 export const setNodeExtent = (nodeExtent: NodeExtent) => createAction(constants.SET_NODE_EXTENT, nodeExtent);
 
 export type ReactFlowAction = ReturnType<
+  | typeof setSourceToTarget
   | typeof setToggleTarget
   | typeof setChangeHandleStyle
   | typeof setOnConnect
