@@ -34,6 +34,40 @@ const toggleTargetClass = (elementBelow: Element | null) => {
 
 export default function reactFlowReducer(state = initialState, action: ReactFlowAction): ReactFlowState {
   switch (action.type) {
+    case constants.SET_SOURCE_USING_EDGE: {
+      // this will set node handle to source according to edge data
+      // and save the edges
+      const nextNodes: Node[] = state.nodes.reduce((res, node): Node[] => {
+        if (action.payload.edges?.find((edge) => edge.source === node.id)) {
+          var edges = action.payload.edges?.filter((edge) => edge.source === node.id);
+          const newNode = {
+            ...node,
+          };
+          var nextSources: HandleElement[] = newNode.__rf.handleBounds.source ? newNode.__rf.handleBounds.source : [];
+          const nextTargets = newNode.__rf.handleBounds.target?.filter((target: HandleElement) => {
+            edges = edges.filter((edge) => {
+              if (edge.sourceHandle === target.id) {
+                const newNextSources = nextSources.filter((source) => source.id !== edge.sourceHandle);
+                newNextSources.push(target);
+                nextSources = newNextSources;
+                return false;
+              }
+              return true;
+            });
+            return !nextSources.find((source) => source.id === target.id);
+          });
+          newNode.__rf.handleBounds.source = nextSources;
+          newNode.__rf.handleBounds.target = nextTargets;
+          res.push(newNode);
+        } else res.push(node);
+        return res;
+      }, [] as Node[]);
+      return {
+        ...state,
+        nodes: nextNodes,
+        edges: action.payload.edges,
+      };
+    }
     case constants.CHANGE_HANDLE_STYLE: {
       const onDrag = 'onDrag',
         onClick = 'onClick',
@@ -58,9 +92,7 @@ export default function reactFlowReducer(state = initialState, action: ReactFlow
     }
     case constants.SOURCE_TO_TARGET: {
       const sourceHandleId = action.payload.handleBoundsId;
-      var newEdges = [
-        ...state.edges
-      ]
+      var newEdges = [...state.edges];
       const nextNodes: Node[] = state.nodes.reduce((res, node): Node[] => {
         if (node.id === action.payload.nodeId) {
           const updatedNode = {

@@ -19,6 +19,7 @@ import {
   ConnectionMode,
   NodeExtent,
   ElementId,
+  Edge,
 } from '../types';
 
 import * as constants from './contants';
@@ -29,6 +30,8 @@ type SetChangeHandleStyleType = {
   nodeId?: string | null;
   hover?: boolean | undefined;
 };
+
+export const setSourceUsingEdge = (edges: Edge[]) => createAction(constants.SET_SOURCE_USING_EDGE, { edges });
 
 export const setChangeHandleStyle = (data: SetChangeHandleStyleType) =>
   createAction(constants.CHANGE_HANDLE_STYLE, { data });
@@ -154,6 +157,7 @@ export const setNodeExtent = (nodeExtent: NodeExtent) => createAction(constants.
 export type ReactFlowAction = ReturnType<
   | typeof setSourceToTarget
   | typeof setToggleTarget
+  | typeof setSourceUsingEdge
   | typeof setChangeHandleStyle
   | typeof setOnConnect
   | typeof setOnConnectStart

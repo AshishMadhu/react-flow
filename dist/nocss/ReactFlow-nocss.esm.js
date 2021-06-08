@@ -2278,7 +2278,13 @@ var SET_ELEMENTS_SELECTABLE = 'SET_ELEMENTS_SELECTABLE';
 var SET_MULTI_SELECTION_ACTIVE = 'SET_MULTI_SELECTION_ACTIVE';
 var SET_CONNECTION_MODE = 'SET_CONNECTION_MODE';
 var SET_NODE_EXTENT = 'SET_NODE_EXTENT';
+var SET_SOURCE_USING_EDGE = 'SET_SOURCE_USING_EDGE';
 
+var setSourceUsingEdge = function setSourceUsingEdge(edges) {
+  return createAction(SET_SOURCE_USING_EDGE, {
+    edges: edges
+  });
+};
 var setChangeHandleStyle = function setChangeHandleStyle(data) {
   return createAction(CHANGE_HANDLE_STYLE, {
     data: data
@@ -2439,6 +2445,7 @@ var setNodeExtent = function setNodeExtent(nodeExtent) {
 
 var actions = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  setSourceUsingEdge: setSourceUsingEdge,
   setChangeHandleStyle: setChangeHandleStyle,
   setSourceToTarget: setSourceToTarget,
   setToggleTarget: setToggleTarget,
@@ -10931,6 +10938,55 @@ function reactFlowReducer() {
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
   switch (action.type) {
+    case SET_SOURCE_USING_EDGE:
+      {
+        // this will set node handle to source according to edge data
+        // and save the edges
+        var nextNodes = state.nodes.reduce(function (res, node) {
+          var _action$payload$edges;
+
+          if ((_action$payload$edges = action.payload.edges) !== null && _action$payload$edges !== void 0 && _action$payload$edges.find(function (edge) {
+            return edge.source === node.id;
+          })) {
+            var _action$payload$edges2, _newNode$__rf$handleB;
+
+            var edges = (_action$payload$edges2 = action.payload.edges) === null || _action$payload$edges2 === void 0 ? void 0 : _action$payload$edges2.filter(function (edge) {
+              return edge.source === node.id;
+            });
+
+            var newNode = _objectSpread$1({}, node);
+
+            var nextSources = newNode.__rf.handleBounds.source ? newNode.__rf.handleBounds.source : [];
+            var nextTargets = (_newNode$__rf$handleB = newNode.__rf.handleBounds.target) === null || _newNode$__rf$handleB === void 0 ? void 0 : _newNode$__rf$handleB.filter(function (target) {
+              edges = edges.filter(function (edge) {
+                if (edge.sourceHandle === target.id) {
+                  var newNextSources = nextSources.filter(function (source) {
+                    return source.id !== edge.sourceHandle;
+                  });
+                  newNextSources.push(target);
+                  nextSources = newNextSources;
+                  return false;
+                }
+
+                return true;
+              });
+              return !nextSources.find(function (source) {
+                return source.id === target.id;
+              });
+            });
+            newNode.__rf.handleBounds.source = nextSources;
+            newNode.__rf.handleBounds.target = nextTargets;
+            res.push(newNode);
+          } else res.push(node);
+
+          return res;
+        }, []);
+        return _objectSpread$1(_objectSpread$1({}, state), {}, {
+          nodes: nextNodes,
+          edges: action.payload.edges
+        });
+      }
+
     case CHANGE_HANDLE_STYLE:
       {
         var onDrag = 'onDrag',
@@ -10946,18 +11002,19 @@ function reactFlowReducer() {
 
           case onClick:
             {
-              var nextNodes = changeOnClickAndHoverHandler(state, state.connectionNodeId);
+              var _nextNodes = changeOnClickAndHoverHandler(state, state.connectionNodeId);
+
               return _objectSpread$1(_objectSpread$1({}, state), {}, {
-                nodes: nextNodes
+                nodes: _nextNodes
               });
             }
 
           case onHover:
             {
-              var _nextNodes = changeOnClickAndHoverHandler(state, action.payload.data.nodeId, action.payload.data.hover);
+              var _nextNodes2 = changeOnClickAndHoverHandler(state, action.payload.data.nodeId, action.payload.data.hover);
 
               return _objectSpread$1(_objectSpread$1({}, state), {}, {
-                nodes: _nextNodes
+                nodes: _nextNodes2
               });
             }
 
@@ -10974,7 +11031,7 @@ function reactFlowReducer() {
 
         var newEdges = _toConsumableArray(state.edges);
 
-        var _nextNodes2 = state.nodes.reduce(function (res, node) {
+        var _nextNodes3 = state.nodes.reduce(function (res, node) {
           if (node.id === action.payload.nodeId) {
             var updatedNode = _objectSpread$1(_objectSpread$1({}, node), {}, {
               __rf: _objectSpread$1({}, node.__rf)
@@ -11011,7 +11068,7 @@ function reactFlowReducer() {
         }, []);
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes2,
+          nodes: _nextNodes3,
           edges: newEdges
         });
       }
@@ -11022,7 +11079,7 @@ function reactFlowReducer() {
         var handleBoundsId = action.payload.handleBoundsId;
         var elementBelow = action.payload.elementBelow;
 
-        var _nextNodes3 = state.nodes.reduce(function (res, node) {
+        var _nextNodes4 = state.nodes.reduce(function (res, node) {
           if (node.id === targetNodeId) {
             var updatedNode = _objectSpread$1(_objectSpread$1({}, node), {}, {
               __rf: _objectSpread$1({}, node.__rf)
@@ -11081,7 +11138,7 @@ function reactFlowReducer() {
         }, []);
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes3
+          nodes: _nextNodes4
         });
       }
 
@@ -11130,11 +11187,11 @@ function reactFlowReducer() {
 
           return res;
         }, nextElements),
-            _nextNodes4 = _propElements$reduce.nextNodes,
+            _nextNodes5 = _propElements$reduce.nextNodes,
             nextEdges = _propElements$reduce.nextEdges;
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes4,
+          nodes: _nextNodes5,
           edges: nextEdges
         });
       }
@@ -11185,7 +11242,7 @@ function reactFlowReducer() {
           };
         }
 
-        var _nextNodes5 = state.nodes.map(function (node) {
+        var _nextNodes6 = state.nodes.map(function (node) {
           if (node.id === id) {
             return _objectSpread$1(_objectSpread$1({}, node), {}, {
               __rf: _objectSpread$1(_objectSpread$1({}, node.__rf), {}, {
@@ -11198,7 +11255,7 @@ function reactFlowReducer() {
         });
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes5
+          nodes: _nextNodes6
         });
       }
 
@@ -11209,7 +11266,7 @@ function reactFlowReducer() {
             diff = _action$payload2.diff,
             isDragging = _action$payload2.isDragging;
 
-        var _nextNodes6 = state.nodes.map(function (node) {
+        var _nextNodes7 = state.nodes.map(function (node) {
           var _state$selectedElemen;
 
           if (_id === node.id || (_state$selectedElemen = state.selectedElements) !== null && _state$selectedElemen !== void 0 && _state$selectedElemen.find(function (sNode) {
@@ -11235,7 +11292,7 @@ function reactFlowReducer() {
         });
 
         return _objectSpread$1(_objectSpread$1({}, state), {}, {
-          nodes: _nextNodes6
+          nodes: _nextNodes7
         });
       }
 
